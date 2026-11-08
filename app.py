@@ -461,6 +461,85 @@ def akun_hapus(aid):
     db.commit()
     return redirect("/akun")
 
+def label_tanggal(iso):
+    d = date.fromisoformat(iso)
+    teks = label_hari(d)
+    return ("Hari ini • " + teks) if d == date.today() else teks
+
+
+@app.route("/riwayat")
+def riwayat():
+    db = get_db()
+    f = request.args.get("f", "semua")
+    p = request.args.get("p", "semua")
+    sql = ("SELECT t.*, a.nama AS akun FROM transaksi t "
+           "JOIN akun a ON a.id = t.akun_id WHERE 1=1")
+    par = []
+    if f == "masuk":
+        sql += " AND t.tipe='masuk'"
+    elif f == "keluar":
+        sql += " AND t.tipe='keluar'"
+    elif f == "transfer":
+        sql += " AND t.tipe LIKE 'transfer%'"
+    if p == "bulan":
+        sql += " AND t.tanggal >= ?"
+        par.append(date.today().replace(day=1).isoformat())
+    sql += " ORDER BY t.tanggal DESC, t.id DESC"
+    rows = db.execute(sql, par).fetchall()
+    masuk = sum(r["jumlah"] for r in rows if r["tipe"] == "masuk")
+    keluar = sum(r["jumlah"] for r in rows if r["tipe"] == "keluar")
+    kelompok = {}
+    for r in rows:
+        kelompok.setdefault(r["tanggal"], []).append(
+            dict(r, ikon=ikon(r["kategori"])))
+    grup = [{"label": label_tanggal(k), "isi": v} for k, v in kelompok.items()]
+    total = masuk + keluar
+    return render_template(
+        "riwayat.html", f=f, p=p, masuk=masuk, keluar=keluar, grup=grup,
+        persen_keluar=round(keluar * 100 / total) if total else 0)
+
+
+JENIS_LABEL = {"masuk": "Pemasukan", "keluar": "Pengeluaran",
+               "transfer_masuk": "Transfer masuk",
+               "transfer_keluar": "Transfer keluar"}
+
+
+def ambil_transaksi(db, tid):
+    return db.execute("""
+        SELECT t.*, a.nama AS akun, a.jenis AS jenis_akun FROM transaksi t
+        JOIN akun a ON a.id = t.akun_id WHERE t.id=?""", (tid,)).fetchone()
+
+
+@app.route("/transaksi/<int:tid>")
+def transaksi_detail(tid):
+    t = ambil_transaksi(get_db(), tid)
+    if not t:
+        return redirect("/riwayat")
+    return render_template("transaksi_detail.html", t=t, ik=ikon(t["kategori"]),
+                           jenis_label=JENIS_LABEL.get(t["tipe"], t["tipe"]))
+
+
+@app.route("/transaksi/<int:tid>/edit")
+def transaksi_edit(tid):
+    db = get_db()
+    t = ambil_transaksi(db, tid)
+    if not t or t["tipe"] not in ("masuk", "keluar"):
+        return redirect(f"/transaksi/{tid}")
+    kat = KAT_MASUK if t["tipe"] == "masuk" else KAT_KELUAR
+    return render_template("transaksi_edit.html", t=t, akun=ambil_akun(db), kat=kat)
+
+
+@app.route("/transaksi/<int:tid>/simpan", methods=["POST"])
+def transaksi_simpan(tid):
+    db = get_db()
+    f = request.form
+    db.execute("""UPDATE transaksi SET kategori=?, jumlah=?, akun_id=?, tanggal=?, catatan=?
+                  WHERE id=? AND tipe IN ('masuk','keluar')""",
+               (f["kategori"], int(f["jumlah"]), int(f["akun_id"]),
+                f["tanggal"], f.get("catatan", "").strip(), tid))
+    db.commit()
+    return redirect(f"/transaksi/{tid}")
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)

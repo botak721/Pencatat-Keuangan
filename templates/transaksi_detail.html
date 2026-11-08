@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block sub %}Detail Transaksi{% endblock %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-4 pt-3">
+{% set mm = t.tipe in ('masuk','transfer_masuk') %}
+<a href="/riwayat" class="flex items-center gap-1 text-primary font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Riwayat</a>
+<div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm flex flex-col items-center gap-2">
+<div class="w-14 h-14 rounded-full {{ 'bg-tertiary-container/15 text-tertiary' if mm else 'bg-error-container/60 text-error' }} flex items-center justify-center"><span class="material-symbols-outlined text-[28px]">{{ ik }}</span></div>
+<span class="px-3 py-1 rounded-full bg-surface-container-low font-label-md text-label-md text-on-surface-variant">{{ jenis_label }}</span>
+<div class="font-currency-display text-currency-display {{ 'text-tertiary' if mm else 'text-error' }}">{{ '+' if mm else '-' }}{{ t.jumlah|rp }}</div>
+<span class="font-body-md text-body-md text-on-surface-variant">Kategori: {{ t.kategori }}</span></div>
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col">
+{% for n, v in [('Tanggal', t.tanggal), ('Akun', t.akun ~ ' (' ~ t.jenis_akun ~ ')'), ('Catatan', t.catatan or '-'), ('ID Transaksi', '#TRX-' ~ t.id)] %}
+<div class="flex justify-between gap-4 py-2.5 border-b border-outline-variant/40 last:border-0"><span class="font-label-md text-label-md text-on-surface-variant">{{ n }}</span><span class="font-body-md text-body-md text-on-surface text-right">{{ v }}</span></div>{% endfor %}</div>
+{% if t.tipe in ('masuk','keluar') %}<a href="/transaksi/{{ t.id }}/edit" class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary text-center font-title-md text-title-md">Edit Transaksi</a>
+{% else %}<p class="font-body-sm text-body-sm text-on-surface-variant">Transfer dicatat dua baris (keluar dan masuk). Kalau salah, hapus kedua barisnya lalu buat transfer baru.</p>{% endif %}
+<form method="post" action="/transaksi/hapus/{{ t.id }}" onsubmit="return confirm('Hapus transaksi ini?')"><button class="w-full py-3 rounded-xl text-error font-label-md text-label-md bg-error-container/40">Hapus Transaksi</button></form>
+</div></main>{% endblock %}

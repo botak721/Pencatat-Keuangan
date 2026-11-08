@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block sub %}Riwayat{% endblock %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-4 pt-3">
+<div class="flex items-center bg-surface-container-lowest rounded-xl shadow-sm px-3 gap-2"><span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input id="cari" placeholder="Cari kategori, akun, atau catatan..." class="w-full h-12 bg-transparent outline-none font-body-md text-body-md"></div>
+<div class="flex gap-2 overflow-x-auto -mx-gutter px-gutter">
+{% for k, n in [('semua','Semua'),('masuk','Pemasukan'),('keluar','Pengeluaran'),('transfer','Transfer')] %}<a href="/riwayat?f={{ k }}&p={{ p }}" class="shrink-0 px-3.5 py-2 rounded-full font-label-md text-label-md {{ "bg-primary text-on-primary" if f == k else "bg-surface-container-low text-on-surface-variant" }}">{{ n }}</a>{% endfor %}
+{% for k, n in [('semua','Semua waktu'),('bulan','Bulan ini')] %}<a href="/riwayat?f={{ f }}&p={{ k }}" class="shrink-0 px-3.5 py-2 rounded-full font-label-md text-label-md {{ "bg-primary text-on-primary" if p == k else "bg-surface-container-low text-on-surface-variant" }}">{{ n }}</a>{% endfor %}
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col gap-2.5">
+<div class="flex justify-between"><div><span class="font-label-sm text-label-sm text-on-surface-variant">Total Pemasukan</span><div class="font-currency-body text-currency-body text-tertiary">+{{ masuk|rp }}</div></div>
+<div class="text-right"><span class="font-label-sm text-label-sm text-on-surface-variant">Total Pengeluaran</span><div class="font-currency-body text-currency-body text-error">-{{ keluar|rp }}</div></div></div>
+<div class="flex h-2 rounded-full overflow-hidden bg-surface-container"><div class="bg-tertiary-fixed-dim" style="width: {{ 100 - persen_keluar }}%;"></div><div class="bg-error" style="width: {{ persen_keluar }}%;"></div></div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant"><span>Rasio pengeluaran: {{ persen_keluar }}%</span><span>Selisih: {{ '+' if masuk >= keluar else '-' }}{{ (masuk - keluar)|abs|rp }}</span></div></div>
+{% for g in grup %}<div class="grup flex flex-col gap-2">
+<div class="flex justify-between"><span class="font-label-md text-label-md text-primary font-semibold">{{ g.label }}</span><span class="font-label-sm text-label-sm text-on-surface-variant">{{ g.isi|length }} transaksi</span></div>
+{% for t in g.isi %}{% set mm = t.tipe in ('masuk','transfer_masuk') %}
+<a href="/transaksi/{{ t.id }}" data-cari="{{ (t.kategori ~ ' ' ~ t.akun ~ ' ' ~ (t.catatan or ''))|lower }}" class="item bg-surface-container-lowest rounded-xl p-3 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-full {{ 'bg-tertiary-container/15 text-tertiary' if mm else 'bg-error-container/60 text-error' }} flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[20px]">{{ t.ikon }}</span></div>
+<div class="flex flex-col min-w-0"><p class="font-body-md text-body-md font-semibold text-on-surface truncate">{{ t.catatan or t.kategori }}</p><p class="font-label-sm text-label-sm text-on-surface-variant truncate">{{ t.kategori }} • {{ t.akun }}</p></div></div>
+<p class="font-currency-body text-currency-body {{ 'text-tertiary' if mm else 'text-error' }} font-semibold shrink-0">{{ '+' if mm else '-' }}{{ t.jumlah|rp }}</p></a>{% endfor %}</div>
+{% else %}<div class="bg-surface-container-lowest rounded-xl p-6 text-center shadow-sm font-body-md text-on-surface-variant">Belum ada transaksi di filter ini.</div>{% endfor %}
+<script>document.getElementById('cari').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('.item').forEach(i=>i.style.display=i.dataset.cari.includes(q)?'':'none');document.querySelectorAll('.grup').forEach(g=>g.style.display=[...g.querySelectorAll('.item')].some(i=>i.style.display!=='none')?'':'none')})</script>
+</div></main>{% endblock %}

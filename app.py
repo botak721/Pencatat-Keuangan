@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
 from flask import Flask, g, redirect, render_template_string, request
 
 app = Flask(__name__)
@@ -78,6 +78,7 @@ PAGE = """
 </head>
 <body>
 <h1>🏍️ Keuangan Ojol</h1>
+<p><a href="/rekap">📊 Rekap mingguan / bulanan</a></p>
 
 <div class="card">
   <h2>Hari ini ({{ hari }})</h2>
@@ -219,6 +220,106 @@ def hapus_transaksi(tid):
     db.commit()
     return redirect("/")
 
+REKAP = """
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rekap Ojol</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:12px;background:#f4f6f8;color:#222}
+  .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px #0001}
+  h1{font-size:20px} h2{font-size:16px;margin:0 0 8px}
+  .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}
+  .row:last-child{border:0}
+  .masuk{color:#0a7d33}.keluar{color:#c62828}
+  .tab a{display:inline-block;padding:8px 14px;border-radius:8px;background:#e3e8ee;color:#222;text-decoration:none;margin-right:6px}
+  .tab a.aktif{background:#1976d2;color:#fff}
+  .kecil{font-size:12px;color:#777}
+</style>
+</head>
+<body>
+<h1>📊 Rekap: {{ judul }}</h1>
+<p><a href="/">← Kembali</a></p>
+<div class="tab" style="margin-bottom:12px">
+  <a href="/rekap?p=minggu" class="{{ 'aktif' if p == 'minggu' }}">7 hari</a>
+  <a href="/rekap?p=bulan" class="{{ 'aktif' if p == 'bulan' }}">Bulan ini</a>
+</div>
+
+<div class="card">
+  <h2>Ringkasan</h2>
+  <div class="row"><span>Pemasukan</span><b class="masuk">{{ total_masuk|rp }}</b></div>
+  <div class="row"><span>Pengeluaran</span><b class="keluar">{{ total_keluar|rp }}</b></div>
+  <div class="row"><span>Bersih</span><b>{{ (total_masuk - total_keluar)|rp }}</b></div>
+  <div class="row"><span>Hari ada transaksi</span><b>{{ hari_kerja }}</b></div>
+  <div class="row"><span>Rata-rata bersih / hari</span><b>{{ rata|rp }}</b></div>
+</div>
+
+<div class="card">
+  <h2>Pemasukan per sumber</h2>
+  {% for r in masuk %}
+    <div class="row"><span>{{ r.kategori }}</span><b class="masuk">{{ r.total|rp }}</b></div>
+  {% else %}<div class="kecil">Belum ada data.</div>{% endfor %}
+</div>
+
+<div class="card">
+  <h2>Pengeluaran per kategori</h2>
+  {% for r in keluar %}
+    <div class="row"><span>{{ r.kategori }}</span><b class="keluar">{{ r.total|rp }}</b></div>
+  {% else %}<div class="kecil">Belum ada data.</div>{% endfor %}
+</div>
+
+<div class="card">
+  <h2>Per hari</h2>
+  {% for h in harian %}
+    <div class="row">
+      <span>{{ h.tanggal }}<br><span class="kecil">+{{ h.masuk|rp }} / -{{ h.keluar|rp }}</span></span>
+      <b>{{ (h.masuk - h.keluar)|rp }}</b>
+    </div>
+  {% else %}<div class="kecil">Belum ada data.</div>{% endfor %}
+</div>
+</body>
+</html>
+"""
+
+
+@app.route("/rekap")
+def rekap():
+    db = get_db()
+    p = request.args.get("p", "minggu")
+    hari_ini = date.today()
+    if p == "bulan":
+        awal, judul = hari_ini.replace(day=1), "Bulan ini"
+    else:
+        p, awal, judul = "minggu", hari_ini - timedelta(days=6), "7 hari terakhir"
+    a, b = awal.isoformat(), hari_ini.isoformat()
+
+    def per_kategori(tipe):
+        return db.execute("""
+            SELECT kategori, SUM(jumlah) AS total FROM transaksi
+            WHERE tipe=? AND tanggal BETWEEN ? AND ?
+            GROUP BY kategori ORDER BY total DESC""", (tipe, a, b)).fetchall()
+
+    masuk, keluar = per_kategori("masuk"), per_kategori("keluar")
+    total_masuk = sum(r["total"] for r in masuk)
+    total_keluar = sum(r["total"] for r in keluar)
+
+    harian = db.execute("""
+        SELECT tanggal,
+               COALESCE(SUM(CASE WHEN tipe='masuk' THEN jumlah END), 0) AS masuk,
+               COALESCE(SUM(CASE WHEN tipe='keluar' THEN jumlah END), 0) AS keluar
+        FROM transaksi
+        WHERE tipe IN ('masuk','keluar') AND tanggal BETWEEN ? AND ?
+        GROUP BY tanggal ORDER BY tanggal DESC""", (a, b)).fetchall()
+
+    hari_kerja = len(harian)
+    rata = (total_masuk - total_keluar) // hari_kerja if hari_kerja else 0
+
+    return render_template_string(
+        REKAP, p=p, judul=judul, masuk=masuk, keluar=keluar,
+        total_masuk=total_masuk, total_keluar=total_keluar,
+        harian=harian, hari_kerja=hari_kerja, rata=rata)
 
 if __name__ == "__main__":
     init_db()

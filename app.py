@@ -406,6 +406,61 @@ def catat():
         "catat.html", akun=ambil_akun(db), kat=kat, hari=hari.isoformat(),
         hari_label="Hari ini, " + label_hari(hari))
 
+@app.route("/akun")
+def akun_list():
+    akun = ambil_akun(get_db())
+    total = sum(a["saldo"] for a in akun)
+    grup = []
+    for j in JENIS_AKUN:
+        isi = [a for a in akun if a["jenis"] == j]
+        sub = sum(a["saldo"] for a in isi)
+        grup.append({"nama": j, "akun": isi, "total": sub,
+                     "persen": round(sub * 100 / total) if total > 0 else 0})
+    return render_template("akun.html", akun=akun, total=total, grup=grup)
+
+
+@app.route("/akun/baru")
+@app.route("/akun/<int:aid>/edit")
+def akun_form(aid=None):
+    db = get_db()
+    a, n = None, 0
+    if aid:
+        a = db.execute("SELECT * FROM akun WHERE id=?", (aid,)).fetchone()
+        if not a:
+            return redirect("/akun")
+        n = db.execute("SELECT COUNT(*) FROM transaksi WHERE akun_id=?",
+                       (aid,)).fetchone()[0]
+    return render_template("akun_form.html", a=a, n=n, jenis=JENIS_AKUN,
+                           err=request.args.get("err"))
+
+
+@app.route("/akun/simpan", methods=["POST"])
+def akun_simpan():
+    db = get_db()
+    f = request.form
+    nama, jenis = f["nama"].strip(), f["jenis"]
+    saldo = int(f.get("saldo_awal") or 0)
+    if f.get("id"):
+        db.execute("UPDATE akun SET nama=?, jenis=?, saldo_awal=? WHERE id=?",
+                   (nama, jenis, saldo, int(f["id"])))
+    else:
+        db.execute("INSERT INTO akun(nama, jenis, saldo_awal) VALUES (?,?,?)",
+                   (nama, jenis, saldo))
+    db.commit()
+    return redirect("/akun")
+
+
+@app.route("/akun/<int:aid>/hapus", methods=["POST"])
+def akun_hapus(aid):
+    db = get_db()
+    n = db.execute("SELECT COUNT(*) FROM transaksi WHERE akun_id=?",
+                   (aid,)).fetchone()[0]
+    if n:
+        return redirect(f"/akun/{aid}/edit?err=1")
+    db.execute("DELETE FROM akun WHERE id=?", (aid,))
+    db.commit()
+    return redirect("/akun")
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)

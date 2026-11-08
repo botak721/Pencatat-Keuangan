@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block sub %}Akun{% endblock %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-5 pt-3">
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-container via-primary to-inverse-surface text-on-primary p-5 shadow-xl shadow-primary/20">
+<span class="font-label-md text-label-md text-on-primary/80 uppercase tracking-wider">Total Saldo Terkelola</span>
+<div class="font-currency-display text-currency-display my-2">{{ total|rp }}</div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-primary/80">{{ akun|length }} akun aktif</span>
+<a href="/akun/baru" class="flex items-center gap-1 bg-on-primary/15 rounded-full px-3 py-2 font-label-md text-label-md active:scale-95"><span class="material-symbols-outlined text-[18px]">add_circle</span>Tambah Akun</a>
+</div></div>
+{% if total > 0 %}
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col gap-2.5">
+<h2 class="font-title-md text-title-md">Alokasi Saldo</h2>
+<div class="flex h-2.5 rounded-full overflow-hidden bg-surface-container">
+{% for g in grup %}<div class="{{ ['bg-primary','bg-tertiary-fixed-dim','bg-secondary'][loop.index0] }}" style="width: {{ g.persen }}%;"></div>{% endfor %}
+</div>
+<div class="flex justify-between">
+{% for g in grup %}<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full {{ ['bg-primary','bg-tertiary-fixed-dim','bg-secondary'][loop.index0] }}"></span><span class="font-label-sm text-label-sm text-on-surface-variant">{{ g.nama }} ({{ g.persen }}%)</span></div>{% endfor %}
+</div></div>
+{% endif %}
+{% for g in grup %}{% if g.akun %}
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-on-surface">{{ g.nama }} <span class="font-label-sm text-label-sm text-on-surface-variant">· {{ g.akun|length }} akun</span></h2>
+<span class="font-currency-body text-currency-body text-on-surface">{{ g.total|rp }}</span></div>
+{% for a in g.akun %}
+<a href="/akun/{{ a.id }}/edit" class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex items-center justify-between active:scale-[0.99]">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs shrink-0">{% if a.jenis == 'Bank' %}{{ a.nama[:3]|upper }}{% else %}<span class="material-symbols-outlined text-[20px]">{{ 'payments' if a.jenis == 'Tunai' else 'account_balance_wallet' }}</span>{% endif %}</div>
+<div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-semibold text-on-surface truncate">{{ a.nama }}</span><span class="font-label-sm text-label-sm text-on-surface-variant">{{ a.jenis }}</span></div></div>
+<div class="flex items-center gap-1 shrink-0"><span class="font-currency-body text-currency-body text-on-surface font-bold">{{ a.saldo|rp }}</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant">chevron_right</span></div>
+</a>{% endfor %}</div>
+{% endif %}{% endfor %}
+{% if not akun %}<div class="bg-surface-container-lowest rounded-xl p-6 text-center shadow-sm"><p class="font-body-md text-on-surface-variant">Belum ada akun. Tekan <b>Tambah Akun</b> untuk mulai.</p></div>{% endif %}
+</div></main>{% endblock %}

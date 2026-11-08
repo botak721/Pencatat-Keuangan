@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block sub %}{{ 'Edit Akun' if a else 'Tambah Akun' }}{% endblock %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-5 pt-3">
+<a href="/akun" class="flex items-center gap-1 text-primary font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Kembali</a>
+{% if err %}<div class="bg-error-container text-on-error-container rounded-xl p-3 font-body-sm text-body-sm">Akun ini punya {{ n }} transaksi, jadi belum bisa dihapus. Hapus atau pindahkan transaksinya dulu.</div>{% endif %}
+<form method="post" action="/akun/simpan" class="flex flex-col gap-y-4" autocomplete="off">
+<input type="hidden" name="id" value="{{ a.id if a else '' }}">
+<div class="flex flex-col gap-2"><label class="font-label-md text-label-md text-on-surface-variant uppercase">Jenis akun</label>
+<div class="flex gap-2">{% for j in jenis %}<label class="flex-1"><input type="radio" name="jenis" value="{{ j }}" class="peer sr-only" {{ 'checked' if (a and a.jenis == j) or (not a and loop.first) }}>
+<div class="text-center py-2.5 rounded-xl bg-surface-container-low text-on-surface-variant font-label-md text-label-md peer-checked:bg-primary peer-checked:text-on-primary transition-all">{{ j }}</div></label>{% endfor %}</div></div>
+<div class="flex flex-col gap-2"><label class="font-label-md text-label-md text-on-surface-variant uppercase">Nama akun</label>
+<input name="nama" required value="{{ a.nama if a else '' }}" placeholder="Contoh: BCA, GoPay, Tunai" class="w-full bg-surface-container-lowest rounded-xl px-3.5 py-3 shadow-sm outline-none focus:ring-2 focus:ring-primary/40 font-body-lg text-body-lg text-on-surface"></div>
+<div class="flex flex-col gap-2"><label class="font-label-md text-label-md text-on-surface-variant uppercase">Saldo awal (Rp)</label>
+<input name="saldo_awal" type="number" inputmode="numeric" value="{{ a.saldo_awal if a else 0 }}" class="w-full bg-surface-container-lowest rounded-xl px-3.5 py-3 shadow-sm outline-none focus:ring-2 focus:ring-primary/40 font-body-lg text-body-lg text-on-surface">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Saldo awal adalah saldo sebelum transaksi pertama yang dicatat. Saldo sekarang = saldo awal + semua transaksi.</p></div>
+<button type="submit" class="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary font-title-md text-title-md shadow-[0_8px_20px_rgba(37,99,235,0.3)] active:scale-[0.98]">Simpan</button>
+</form>
+{% if a %}<form method="post" action="/akun/{{ a.id }}/hapus" onsubmit="return confirm('Hapus akun {{ a.nama }}?')">
+<button type="submit" class="w-full py-3 rounded-xl text-error font-label-md text-label-md bg-error-container/40">Hapus akun ini</button></form>{% endif %}
+</div></main>{% endblock %}

@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import date, timedelta
-from flask import Flask, g, redirect, render_template_string, request
+from flask import Flask, g, redirect, render_template, render_template_string, request
 
 app = Flask(__name__)
 DB = "ojol.db"
@@ -158,8 +158,8 @@ PAGE = """
 """
 
 
-@app.route("/")
-def index():
+@app.route("/lama")
+def index_lama():
     db = get_db()
     hari = date.today().isoformat()
 
@@ -320,6 +320,91 @@ def rekap():
         REKAP, p=p, judul=judul, masuk=masuk, keluar=keluar,
         total_masuk=total_masuk, total_keluar=total_keluar,
         harian=harian, hari_kerja=hari_kerja, rata=rata)
+
+HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
+         "Agustus", "September", "Oktober", "November", "Desember"]
+NAMA = "Driver"          # ganti dengan nama lo
+TARGET_HARIAN = 150000   # ganti dengan target bersih harian lo
+
+KAT_ICON = {
+    "Grab": "two_wheeler", "Gojek": "two_wheeler", "Maxim": "two_wheeler",
+    "inDrive": "two_wheeler", "Tip": "volunteer_activism", "Bonus": "redeem",
+    "Bensin": "local_gas_station", "Makan": "restaurant",
+    "Parkir": "local_parking", "Pulsa/Kuota": "smartphone", "Servis": "build",
+    "Cicilan": "request_quote", "Transfer": "swap_horiz",
+    "Biaya admin": "receipt_long",
+}
+
+
+def ikon(k):
+    return KAT_ICON.get(k, "category")
+
+
+def label_hari(d):
+    return f"{HARI[d.weekday()]}, {d.day} {BULAN[d.month - 1]} {d.year}"
+
+
+def singkat(n):
+    n = abs(int(n))
+    if n >= 1_000_000:
+        return f"{n / 1_000_000:.2f}".rstrip("0").rstrip(".") + "M"
+    if n >= 1000:
+        return f"{n // 1000}K"
+    return str(n)
+
+
+app.jinja_env.filters["singkat"] = singkat
+
+
+def ambil_akun(db):
+    return db.execute("""
+        SELECT a.id, a.nama, a.jenis,
+               a.saldo_awal + COALESCE(SUM(
+                 CASE WHEN t.tipe IN ('masuk','transfer_masuk') THEN t.jumlah
+                      WHEN t.tipe IN ('keluar','transfer_keluar') THEN -t.jumlah END), 0) AS saldo
+        FROM akun a LEFT JOIN transaksi t ON t.akun_id = a.id
+        GROUP BY a.id ORDER BY a.id
+    """).fetchall()
+
+
+@app.route("/")
+def beranda():
+    db = get_db()
+    hari = date.today()
+    h = hari.isoformat()
+    akun = ambil_akun(db)
+
+    def total_hari(tipe):
+        return db.execute(
+            "SELECT COALESCE(SUM(jumlah),0) FROM transaksi WHERE tanggal=? AND tipe=?",
+            (h, tipe)).fetchone()[0]
+
+    masuk, keluar = total_hari("masuk"), total_hari("keluar")
+    bersih = masuk - keluar
+    rows = db.execute("""
+        SELECT t.*, a.nama AS akun FROM transaksi t
+        JOIN akun a ON a.id = t.akun_id
+        ORDER BY t.tanggal DESC, t.id DESC LIMIT 5
+    """).fetchall()
+    riwayat = [dict(r, ikon=ikon(r["kategori"])) for r in rows]
+    return render_template(
+        "beranda.html", nama=NAMA, hari_label=label_hari(hari), akun=akun,
+        total=sum(a["saldo"] for a in akun), masuk=masuk, keluar=keluar,
+        bersih=bersih, target=TARGET_HARIAN,
+        persen=min(100, max(0, bersih * 100 // TARGET_HARIAN)),
+        sisa=max(0, TARGET_HARIAN - bersih), riwayat=riwayat)
+
+
+@app.route("/catat")
+def catat():
+    db = get_db()
+    hari = date.today()
+    kat = {"masuk": [[k, ikon(k)] for k in KAT_MASUK],
+           "keluar": [[k, ikon(k)] for k in KAT_KELUAR]}
+    return render_template(
+        "catat.html", akun=ambil_akun(db), kat=kat, hari=hari.isoformat(),
+        hari_label="Hari ini, " + label_hari(hari))
 
 if __name__ == "__main__":
     init_db()

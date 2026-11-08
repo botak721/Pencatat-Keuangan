@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-5">
+<!-- Top Greeting & Sync Status -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<h1 class="font-headline-sm text-headline-sm text-on-surface truncate">Halo, {{ nama }}!</h1>
+<span class="text-headline-sm select-none">👋</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">{{ hari_label }}</p>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-tertiary-container/15 rounded-full shrink-0 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold">Siap mencatat</span>
+</div>
+</div>
+<!-- Hero Total Saldo Card -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-container via-primary to-inverse-surface text-on-primary p-5 shadow-xl shadow-primary/20">
+<!-- Decorative Ambient Glow & Mesh -->
+<div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-tertiary-fixed/20 blur-3xl pointer-events-none"></div>
+<div class="absolute right-4 bottom-2 text-on-primary/5 select-none pointer-events-none">
+<span class="material-symbols-outlined text-[120px]">account_balance_wallet</span>
+</div>
+<!-- Top Row: Label & Visibility Toggle -->
+<div class="relative z-10 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-primary/80 uppercase tracking-wider">Total Saldo Bersih</span>
+<button aria-label="Sembunyikan atau tampilkan saldo" class="flex items-center justify-center w-6 h-6 rounded-full bg-on-primary/10 hover:bg-on-primary/20 transition-colors" id="toggleBalanceBtn">
+<span class="material-symbols-outlined text-[16px] text-on-primary" id="eyeIcon">visibility</span>
+</button>
+</div>
+<!-- Growth Badge -->
+<div class="flex items-center gap-1 bg-surface-container-lowest/15 backdrop-blur-md px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-tertiary-fixed text-[14px]">account_balance</span>
+<span class="font-label-sm text-label-sm font-semibold text-tertiary-fixed">{{ akun|length }} akun</span>
+</div>
+</div>
+<!-- Middle Row: Currency Display -->
+<div class="relative z-10 my-3">
+<div class="font-currency-display text-currency-display text-on-primary tracking-tight" id="balanceDisplay">
+        {{ total|rp }}
+      </div>
+<div class="hidden font-currency-display text-currency-display text-on-primary tracking-widest" id="hiddenBalanceDisplay">
+        ••••••••••••
+      </div>
+</div>
+<!-- Quick Action Capsule Grid -->
+<div class="relative z-10 grid grid-cols-4 gap-2 pt-2">
+<a class="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-container-lowest/10 hover:bg-surface-container-lowest/20 backdrop-blur-sm transition-all active:scale-95 group" href="/catat">
+<div class="w-8 h-8 rounded-full bg-on-primary/15 flex items-center justify-center mb-1 group-hover:bg-on-primary/25 transition-colors">
+<span class="material-symbols-outlined text-[18px] text-on-primary">send</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-primary font-medium">Transfer</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-container-lowest/10 hover:bg-surface-container-lowest/20 backdrop-blur-sm transition-all active:scale-95 group" href="/lama">
+<div class="w-8 h-8 rounded-full bg-on-primary/15 flex items-center justify-center mb-1 group-hover:bg-on-primary/25 transition-colors">
+<span class="material-symbols-outlined text-[18px] text-on-primary">add_circle</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-primary font-medium">Catat</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-container-lowest/10 hover:bg-surface-container-lowest/20 backdrop-blur-sm transition-all active:scale-95 group" href="/rekap">
+<div class="w-8 h-8 rounded-full bg-on-primary/15 flex items-center justify-center mb-1 group-hover:bg-on-primary/25 transition-colors">
+<span class="material-symbols-outlined text-[18px] text-on-primary">bar_chart</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-primary font-medium">Rekap</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-container-lowest/10 hover:bg-surface-container-lowest/20 backdrop-blur-sm transition-all active:scale-95 group" href="/lama">
+<div class="w-8 h-8 rounded-full bg-on-primary/15 flex items-center justify-center mb-1 group-hover:bg-on-primary/25 transition-colors">
+<span class="material-symbols-outlined text-[18px] text-on-primary">account_balance_wallet</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-primary font-medium">Akun</span>
+</a>
+</div>
+</div>
+<!-- Today's Statistics Tri-Card Row -->
+<div class="grid grid-cols-3 gap-2">
+<!-- Card 1: Pemasukan -->
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-[0_4px_16px_rgba(11,28,48,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Masuk</span>
+<div class="w-5 h-5 rounded-full bg-tertiary-container/15 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary text-[14px]">arrow_downward</span>
+</div>
+</div>
+<div class="font-title-md text-title-md text-tertiary tracking-tight leading-none truncate">
+        +{{ masuk|singkat }}
+      </div>
+<span class="font-label-sm text-[10px] text-on-surface-variant/80 mt-1">Hari Ini</span>
+</div>
+<!-- Card 2: Pengeluaran -->
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-[0_4px_16px_rgba(11,28,48,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Keluar</span>
+<div class="w-5 h-5 rounded-full bg-error-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-error text-[14px]">arrow_upward</span>
+</div>
+</div>
+<div class="font-title-md text-title-md text-error tracking-tight leading-none truncate">
+        -{{ keluar|singkat }}
+      </div>
+<span class="font-label-sm text-[10px] text-on-surface-variant/80 mt-1">Hari Ini</span>
+</div>
+<!-- Card 3: Net Bersih -->
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-[0_4px_16px_rgba(11,28,48,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Net Bersih</span>
+<div class="w-5 h-5 rounded-full bg-primary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-[14px]">equalizer</span>
+</div>
+</div>
+<div class="font-title-md text-title-md text-primary tracking-tight leading-none truncate">
+        {{ '+' if bersih>=0 else '-' }}{{ bersih|singkat }}
+      </div>
+<span class="font-label-sm text-[10px] text-on-surface-variant/80 mt-1">{{ 'Surplus' if bersih>=0 else 'Defisit' }}</span>
+</div>
+</div>
+<!-- Daily Income Target Progress Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.05)] flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">flag</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-body-md font-semibold text-on-surface">Target Penghasilan Harian</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ bersih|rp }} / {{ target|rp }}</span>
+</div>
+</div>
+<div class="px-2.5 py-0.5 rounded-full bg-primary-fixed/60 text-primary font-label-md text-label-md font-bold">
+        {{ persen }}%
+      </div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
+<div class="bg-gradient-to-r from-primary-container to-tertiary-fixed-dim h-full rounded-full transition-all duration-700" style="width: {{ persen }}%;"></div>
+</div>
+<div class="flex items-center justify-between pt-0.5">
+<p class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary">info</span>
+<span class="">{% if sisa>0 %}Tersisa <strong>{{ sisa|rp }}</strong> lagi untuk capai target!{% else %}Target tercapai! 🎉{% endif %}</span>
+</p>
+<span class="font-label-sm text-label-sm font-semibold text-primary">Semangat! ⚡</span>
+</div>
+</div>
+<!-- Accounts Quick Overview Carousel -->
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-on-surface">Dompet &amp; Rekening</h2>
+<a class="font-label-md text-label-md text-primary font-semibold hover:underline" href="/lama">Kelola</a>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-1 -mx-gutter px-gutter scrollbar-none">
+{% for a in akun %}<!-- Account: BCA -->
+<div class="min-w-[190px] bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col justify-between shrink-0">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">
+              {{ a.nama[:3]|upper if a.jenis=='Bank' else '' }}{% if a.jenis!='Bank' %}<span class="material-symbols-outlined text-[18px]">{{ 'payments' if a.jenis=='Tunai' else 'account_balance_wallet' }}</span>{% endif %}</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface leading-tight">{{ a.nama }}</span>
+<span class="font-label-sm text-[10px] text-on-surface-variant">{{ a.jenis }}</span>
+</div>
+</div>
+</div>
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase">Saldo</span>
+<p class="font-currency-body text-currency-body text-on-surface font-bold">{{ a.saldo|rp }}</p>
+</div>
+</div>
+{% else %}<p class="font-body-sm text-on-surface-variant">Belum ada akun. Tambah di menu Kelola.</p>{% endfor %}
+</div>
+</div>
+<!-- Recent Transactions List -->
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-on-surface">Transaksi Terbaru</h2>
+<a class="font-label-md text-label-md text-primary font-semibold hover:underline" href="/lama">Lihat Semua</a>
+</div>
+<div class="flex flex-col gap-2">
+{% for t in riwayat %}{% set mm = t.tipe in ("masuk","transfer_masuk") %}<!-- Item 1: Tokopedia -->
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-full {{ 'bg-tertiary-container/15' if mm else 'bg-error-container/60' }} flex items-center justify-center {{ 'text-tertiary' if mm else 'text-error' }} shrink-0">
+<span class="material-symbols-outlined text-[20px]">{{ t.ikon }}</span>
+</div>
+<div class="flex flex-col min-w-0">
+<p class="font-body-md text-body-md font-semibold text-on-surface truncate">{{ t.catatan or t.kategori }}</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">{{ t.kategori }} • {{ t.akun }} • {{ t.tanggal }}</p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<p class="font-currency-body text-currency-body {{ 'text-tertiary' if mm else 'text-error' }} font-semibold">{{ '+' if mm else '-' }}{{ t.jumlah|rp }}</p>
+<span class="font-label-sm text-[10px] text-on-surface-variant">{{ 'Masuk' if mm else 'Keluar' }}</span>
+</div>
+</div>
+{% else %}<p class="font-body-sm text-on-surface-variant">Belum ada transaksi. Tekan tombol + untuk mencatat.</p>{% endfor %}
+</div>
+</div>
+</div>
+<script>
+  // Balance Visibility Toggle Interactive Micro-interaction
+  const toggleBtn = document.getElementById('toggleBalanceBtn');
+  const balanceDisplay = document.getElementById('balanceDisplay');
+  const hiddenBalanceDisplay = document.getElementById('hiddenBalanceDisplay');
+  const eyeIcon = document.getElementById('eyeIcon');
+
+  let isHidden = false;
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      isHidden = !isHidden;
+      if (isHidden) {
+        balanceDisplay.classList.add('hidden');
+        hiddenBalanceDisplay.classList.remove('hidden');
+        eyeIcon.textContent = 'visibility_off';
+      } else {
+        balanceDisplay.classList.remove('hidden');
+        hiddenBalanceDisplay.classList.add('hidden');
+        eyeIcon.textContent = 'visibility';
+      }
+    });
+  }
+</script></main>{% endblock %}

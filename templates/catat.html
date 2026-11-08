@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com">const KAT={{ kat|tojson }}; const CT=`<button type="button" class="cat-pill active flex items-center gap-2 p-2.5 rounded-xl bg-primary text-on-primary transition-all text-left" onclick="selectCategory(this, 'Makanan &amp; Minuman')"> <div class="w-8 h-8 rounded-lg bg-surface-container-lowest/20 flex items-center justify-center shrink-0"> <span class="material-symbols-outlined text-[18px]">__ICON__</span> </div> <div class="min-w-0 flex flex-col"> <span class="font-label-md text-label-md truncate">__NAME__</span> <span class="font-label-sm text-[10px] opacity-80 truncate">__SUB__</span> </div> </button>`; function renderKat(){const t=document.getElementById('tipe').value; document.getElementById('category-grid').innerHTML=KAT[t].map(([n,i])=>CT.replaceAll('__ICON__',i).replaceAll('__NAME__',n).replaceAll('__SUB__',t==='masuk'?'Pemasukan':'Pengeluaran')).join(''); const f=document.querySelector('.cat-pill'); if(f) f.click();} renderKat(); const fa=document.querySelector('.acc-card'); if(fa) fa.click();
+</script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "background": "#f8f9ff", "primary": "#004ac6", "on-surface-variant": "#434655", "inverse-on-surface": "#eaf1ff", "tertiary-fixed": "#6ffbbe", "primary-fixed": "#dbe1ff", "tertiary-fixed-dim": "#4edea3", "on-surface": "#0b1c30", "surface-container-low": "#eff4ff", "secondary-fixed-dim": "#bec6e0", "on-error": "#ffffff", "surface-variant": "#d3e4fe", "error": "#ba1a1a", "inverse-surface": "#213145", "on-primary-fixed-variant": "#003ea8", "on-secondary-fixed-variant": "#3f465c", "on-error-container": "#93000a", "error-container": "#ffdad6", "on-secondary-fixed": "#131b2e", "on-background": "#0b1c30", "surface-dim": "#cbdbf5", "surface-container-highest": "#d3e4fe", "outline-variant": "#c3c6d7", "on-primary": "#ffffff", "on-tertiary-fixed": "#002113", "surface-container-lowest": "#ffffff", "secondary-container": "#dae2fd", "outline": "#737686", "inverse-primary": "#b4c5ff", "on-primary-fixed": "#00174b", "tertiary-container": "#007d55", "on-primary-container": "#eeefff", "primary-container": "#2563eb", "surface-tint": "#0053db", "on-tertiary-fixed-variant": "#005236", "tertiary": "#006242", "primary-fixed-dim": "#b4c5ff", "on-secondary": "#ffffff", "surface-container-high": "#dce9ff", "on-tertiary-container": "#bdffdb", "secondary": "#565e74", "surface-bright": "#f8f9ff", "on-tertiary": "#ffffff", "on-secondary-container": "#5c647a", "surface-container": "#e5eeff", "secondary-fixed": "#dae2fd", "surface": "#f8f9ff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-md": "1rem", "space-sm": "0.5rem", "space-xl": "2rem", "gutter": "1rem", "space-lg": "1.5rem", "margin": "1rem" }, "fontFamily": { "currency-display": ["Plus Jakarta Sans"], "display-hero": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "title-md": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "currency-body": ["Inter"], "headline-lg": ["Plus Jakarta Sans"], "body-sm": ["Inter"], "body-lg": ["Inter"] }, "fontSize": { "currency-display": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "display-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "title-md": ["16px", { "lineHeight": "22px", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "currency-body": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }] } } } }</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary/20"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(11,28,48,0.04)] pt-safe"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs min-w-0"><button type="button" aria-label="Go back" class="w-11 h-11 -ml-2 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container-low transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="FINTRACK Logo" class="h-7 w-auto object-contain shrink-0 hidden sm:block" src="https://lh3.googleusercontent.com/aida/ALJJyrCBRXMz9tlgv9lOORU7wuJFQcJCi7XAfNRwvDNf7CDv3Xnv_-IBZPrdW6P7xgpsVPklDDfHUgLxZCdLqLr9bij1EkuFyFKsdMFXA1JtoLmTNZX_hpFZGQKNUJdDa9LCKfMOdxzOm7FlXlED1YnUInLLgzJIxRUxajHRiWzKl9MdUn_1klbTQJf4cJIjFl-5GgZVY-QAYwkOhF8ODWiTslKU4shZ9MESbdIKDLpPDg"/><h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight truncate">Add Transaction</h1></div><div class="flex items-center gap-space-xs shrink-0"><a class="w-11 h-11 flex items-center justify-center rounded-full" data-path="settings-profile" href="#"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-primary/20"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></a></div></div></header><form id="f" method="post" action="/transaksi/tambah" autocomplete="off"><main class="flex flex-col relative w-full pt-16 pb-safe bg-background min-h-screen"><div class="flex flex-col w-full pb-8">
+<div class="w-full bg-surface-container-lowest rounded-t-[28px] shadow-2xl flex flex-col pt-3 pb-6 px-gutter">
+<div class="w-full flex items-center justify-center pb-2">
+<div class="w-10 h-1.5 bg-outline-variant/60 rounded-full"></div>
+</div>
+<div class="flex items-center justify-between pb-3 pt-1">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Tambah Transaksi</h2>
+</div>
+<button type="button" aria-label="Tutup modal" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors" onclick="history.back()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="w-full bg-surface-container-low p-1 rounded-xl flex items-center mb-5">
+<button type="button" class="flex-1 py-2 rounded-lg font-label-md text-label-md text-on-primary bg-primary shadow-sm transition-all text-center" id="tab-expense" onclick="switchTxType('expense')">
+        Pengeluaran
+      </button>
+<button type="button" class="flex-1 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all text-center" id="tab-income" onclick="switchTxType('income')">
+        Pemasukan
+      </button>
+<button type="button" class="flex-1 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all text-center" id="tab-transfer" onclick="switchTxType('transfer')">
+        Transfer
+      </button>
+</div>
+<div class="bg-surface-container-low/70 rounded-2xl p-4 flex flex-col items-center justify-center mb-4 relative overflow-hidden">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider mb-1">Nominal Transaksi</span>
+<div class="flex items-center justify-center gap-1.5 w-full">
+<span class="font-currency-display text-headline-md text-primary font-bold">Rp</span>
+<input class="font-currency-display text-display-hero text-on-surface font-extrabold tracking-tight" id="jumlah" name="jumlah" inputmode="numeric" placeholder="0" required style="background:transparent;outline:none;width:100%;min-width:0">
+<span class="w-0.5 h-8 bg-primary rounded-full animate-pulse ml-0.5"></span>
+</div>
+<div class="flex items-center gap-1.5 mt-3 overflow-x-auto w-full no-scrollbar justify-center py-1">
+<button type="button" class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-variant transition-colors shrink-0" onclick="addQuickAmount(50000)">
+          +50rb
+        </button>
+<button type="button" class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-variant transition-colors shrink-0" onclick="addQuickAmount(100000)">
+          +100rb
+        </button>
+<button type="button" class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-variant transition-colors shrink-0" onclick="addQuickAmount(200000)">
+          +200rb
+        </button>
+<button type="button" class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-variant transition-colors shrink-0" onclick="addQuickAmount(500000)">
+          +500rb
+        </button>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs mb-5">
+<div class="flex items-center justify-between">
+<label class="font-title-md text-title-md text-on-surface">Kategori Pengeluaran</label>
+<button type="button" class="font-label-sm text-label-sm text-primary font-semibold">Semua Kategori</button>
+</div>
+<div class="grid grid-cols-3 gap-2 pt-1" id="category-grid">
+
+
+
+
+
+
+</div>
+</div>
+<div class="flex flex-col gap-space-xs mb-5">
+<div class="flex items-center justify-between">
+<label class="font-title-md text-title-md text-on-surface">Sumber Dana (Akun)</label>
+<span class="font-label-sm text-label-sm text-secondary">Tersedia {{ akun|length }} Akun</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5 pt-1" id="account-selector-grid">{% for a in akun %}<button type="button" class="acc-card active p-3 rounded-2xl bg-surface-container-high/80 text-left transition-all relative flex flex-col justify-between" onclick="selectAccount(this,{{ a.id }})">
+<div class="flex items-center justify-between w-full mb-2">
+<div class="w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">{{ 'payments' if a.jenis=='Tunai' else ('account_balance_wallet' if a.jenis=='E-Wallet' else 'account_balance') }}</span>
+</div>
+<div class="check-mark w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold truncate">{{ a.nama }}</p>
+<p class="font-body-sm text-body-sm text-secondary font-medium">{{ a.saldo|rp }}</p>
+</div>
+</button>{% endfor %}
+
+
+
+
+</div>
+</div>
+<div class="flex flex-col gap-2.5 mb-5">
+<div class="flex items-center gap-2 p-3 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
+<div class="flex flex-col flex-1 min-w-0">
+<span class="font-label-sm text-label-sm text-secondary">Tanggal &amp; Waktu</span>
+<span class="font-body-md text-body-md text-on-surface font-medium truncate">{{ hari_label }}</span>
+</div>
+<button type="button" class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="flex items-center gap-2 p-2 bg-surface-container-low rounded-xl">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+</div>
+<input class="bg-transparent font-body-md text-body-md text-on-surface placeholder:text-secondary focus:outline-none flex-1 min-w-0 py-1" placeholder="Catatan (Opsional)" type="text"/>
+<button type="button" class="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-primary hover:bg-surface-variant transition-colors shrink-0" title="Lampirkan Struk">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-2">
+<button type="submit" class="w-full h-12 rounded-2xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-lg hover:opacity-95 active:scale-[0.99] transition-all" >
+<span>Simpan Transaksi</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+<div class="hidden mt-3 p-3 bg-tertiary-container text-on-tertiary-container rounded-xl flex items-center gap-2 text-center justify-center animate-fade-in" id="toast">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span class="font-label-md text-label-md font-medium">Transaksi berhasil disimpan ke Bank BCA!</span>
+</div>
+</div>
+</div>
+<script>
+  let currentAmount = 150000;
+
+  function formatIDR(val) {
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function addQuickAmount(delta) {
+    currentAmount += delta;
+    document.getElementById('amount-display').innerText = formatIDR(currentAmount);
+  }
+
+  function switchTxType(type) { if(type==='transfer'){location.href='/lama';return;} document.getElementById('tipe').value=(type==='income'?'masuk':'keluar'); renderKat();
+    const tabs = {
+      expense: document.getElementById('tab-expense'),
+      income: document.getElementById('tab-income'),
+      transfer: document.getElementById('tab-transfer')
+    };
+    
+    Object.keys(tabs).forEach(k => {
+      tabs[k].className = 'flex-1 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all text-center';
+    });
+
+    tabs[type].className = 'flex-1 py-2 rounded-lg font-label-md text-label-md text-on-primary bg-primary shadow-sm transition-all text-center';
+  }
+
+  function selectCategory(el, name) { document.getElementById('kategori').value=name;
+    const all = document.querySelectorAll('.cat-pill');
+    all.forEach(btn => {
+      btn.className = 'cat-pill flex items-center gap-2 p-2.5 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container transition-all text-left';
+      const iconWrap = btn.querySelector('div:first-child');
+      if (iconWrap) {
+        iconWrap.className = 'w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center shrink-0 text-on-secondary-fixed';
+      }
+    });
+
+    el.className = 'cat-pill active flex items-center gap-2 p-2.5 rounded-xl bg-primary text-on-primary transition-all text-left';
+    const activeIcon = el.querySelector('div:first-child');
+    if (activeIcon) {
+      activeIcon.className = 'w-8 h-8 rounded-lg bg-surface-container-lowest/20 flex items-center justify-center shrink-0 text-on-primary';
+    }
+  }
+
+  function selectAccount(el, id) { document.getElementById('akun_id').value=id;
+    const all = document.querySelectorAll('.acc-card');
+    all.forEach(card => {
+      card.className = 'acc-card p-3 rounded-2xl bg-surface-container-low text-left transition-all relative flex flex-col justify-between hover:bg-surface-container';
+      const mark = card.querySelector('.check-mark');
+      if (mark) mark.classList.add('hidden');
+      const iconWrap = card.querySelector('.w-7');
+      if (iconWrap) iconWrap.className = 'w-7 h-7 rounded-lg bg-surface-container-highest text-on-surface flex items-center justify-center';
+    });
+
+    el.className = 'acc-card active p-3 rounded-2xl bg-surface-container-high/80 text-left transition-all relative flex flex-col justify-between';
+    const activeMark = el.querySelector('.check-mark');
+    if (activeMark) activeMark.classList.remove('hidden');
+    const activeIcon = el.querySelector('.w-7');
+    if (activeIcon) activeIcon.className = 'w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center';
+  }
+
+  function submitTransaction() {
+    const toast = document.getElementById('toast');
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 2500);
+  }
+</script><input type="hidden" name="tipe" id="tipe" value="keluar"><input type="hidden" name="kategori" id="kategori"><input type="hidden" name="akun_id" id="akun_id"><input type="hidden" name="tanggal" value="{{ hari }}"></main></form></body></html>

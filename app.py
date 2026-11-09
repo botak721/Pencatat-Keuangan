@@ -372,7 +372,8 @@ def ambil_akun(db):
 def beranda():
     db = get_db()
     hari = date.today()
-    h = hari.isoformat()
+        h = hari.isoformat()
+    cfg = pengaturan(db)
     akun = ambil_akun(db)
 
     def total_hari(tipe):
@@ -389,11 +390,11 @@ def beranda():
     """).fetchall()
     riwayat = [dict(r, ikon=ikon(r["kategori"])) for r in rows]
     return render_template(
-        "beranda.html", nama=NAMA, hari_label=label_hari(hari), akun=akun,
+        "beranda.html", nama=cfg["nama"], hari_label=label_hari(hari), akun=akun,
         total=sum(a["saldo"] for a in akun), masuk=masuk, keluar=keluar,
-        bersih=bersih, target=TARGET_HARIAN,
-        persen=min(100, max(0, bersih * 100 // TARGET_HARIAN)),
-        sisa=max(0, TARGET_HARIAN - bersih), riwayat=riwayat)
+        bersih=bersih, target=cfg["target"],
+        persen=min(100, max(0, bersih * 100 // cfg["target"])),
+        sisa=max(0, cfg["target"] - bersih), riwayat=riwayat)
 
 
 @app.route("/catat")
@@ -539,6 +540,48 @@ def transaksi_simpan(tid):
                 f["tanggal"], f.get("catatan", "").strip(), tid))
     db.commit()
     return redirect(f"/transaksi/{tid}")
+
+def pengaturan(db):
+    db.execute("CREATE TABLE IF NOT EXISTS pengaturan(kunci TEXT PRIMARY KEY, nilai TEXT)")
+    d = {r["kunci"]: r["nilai"] for r in db.execute("SELECT kunci, nilai FROM pengaturan")}
+    return {"nama": d.get("nama", NAMA), "target": int(d.get("target", TARGET_HARIAN))}
+
+
+@app.route("/target")
+def target():
+    db = get_db()
+    cfg = pengaturan(db)
+    hari = date.today()
+    rows = db.execute("""
+        SELECT tanggal,
+               COALESCE(SUM(CASE WHEN tipe='masuk' THEN jumlah END), 0) AS masuk,
+               COALESCE(SUM(CASE WHEN tipe='keluar' THEN jumlah END), 0) AS keluar
+        FROM transaksi WHERE tipe IN ('masuk','keluar') AND tanggal BETWEEN ? AND ?
+        GROUP BY tanggal""",
+        ((hari - timedelta(days=6)).isoformat(), hari.isoformat())).fetchall()
+    bersih = {r["tanggal"]: r["masuk"] - r["keluar"] for r in rows}
+    minggu = []
+    for i in range(6, -1, -1):
+        d = hari - timedelta(days=i)
+        b = bersih.get(d.isoformat(), 0)
+        minggu.append({"label": HARI[d.weekday()][:3], "bersih": b,
+                       "tercapai": b >= cfg["target"],
+                       "persen": min(100, max(0, b * 100 // cfg["target"]))})
+    return render_template(
+        "target.html", cfg=cfg, minggu=minggu, hari_ini=minggu[-1],
+        tercapai=sum(1 for m in minggu if m["tercapai"]), ok=request.args.get("ok"))
+
+
+@app.route("/target/simpan", methods=["POST"])
+def target_simpan():
+    db = get_db()
+    pengaturan(db)
+    nama = request.form.get("nama", "").strip() or NAMA
+    target = max(1, int(request.form.get("target") or TARGET_HARIAN))
+    for k, v in (("nama", nama), ("target", str(target))):
+        db.execute("INSERT OR REPLACE INTO pengaturan(kunci, nilai) VALUES (?,?)", (k, v))
+    db.commit()
+    return redirect("/target?ok=1")
 
 if __name__ == "__main__":
     init_db()

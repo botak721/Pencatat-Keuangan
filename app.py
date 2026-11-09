@@ -284,7 +284,7 @@ REKAP = """
 """
 
 
-@app.route("/rekap")
+@app.route("/rekap-lama")
 def rekap():
     db = get_db()
     p = request.args.get("p", "minggu")
@@ -372,7 +372,7 @@ def ambil_akun(db):
 def beranda():
     db = get_db()
     hari = date.today()
-        h = hari.isoformat()
+    h = hari.isoformat()
     cfg = pengaturan(db)
     akun = ambil_akun(db)
 
@@ -582,6 +582,47 @@ def target_simpan():
         db.execute("INSERT OR REPLACE INTO pengaturan(kunci, nilai) VALUES (?,?)", (k, v))
     db.commit()
     return redirect("/target?ok=1")
+
+@app.route("/rekap")
+def laporan():
+    db = get_db()
+    p = request.args.get("p", "minggu")
+    hari = date.today()
+    if p == "bulan":
+        awal, judul = hari.replace(day=1), "Bulan ini"
+    else:
+        p, awal, judul = "minggu", hari - timedelta(days=6), "7 hari terakhir"
+    a, b = awal.isoformat(), hari.isoformat()
+
+    def per_kategori(tipe):
+        rows = db.execute("""
+            SELECT kategori, SUM(jumlah) AS total FROM transaksi
+            WHERE tipe=? AND tanggal BETWEEN ? AND ?
+            GROUP BY kategori ORDER BY total DESC""", (tipe, a, b)).fetchall()
+        tot = sum(r["total"] for r in rows)
+        return [{"nama": r["kategori"], "total": r["total"], "ikon": ikon(r["kategori"]),
+                 "persen": round(r["total"] * 100 / tot) if tot else 0}
+                for r in rows], tot
+
+    masuk, total_masuk = per_kategori("masuk")
+    keluar, total_keluar = per_kategori("keluar")
+    target = pengaturan(db)["target"]
+    rows = db.execute("""
+        SELECT tanggal,
+               COALESCE(SUM(CASE WHEN tipe='masuk' THEN jumlah END), 0) AS masuk,
+               COALESCE(SUM(CASE WHEN tipe='keluar' THEN jumlah END), 0) AS keluar
+        FROM transaksi WHERE tipe IN ('masuk','keluar') AND tanggal BETWEEN ? AND ?
+        GROUP BY tanggal ORDER BY tanggal DESC""", (a, b)).fetchall()
+    harian = [{"label": label_hari(date.fromisoformat(r["tanggal"])),
+               "masuk": r["masuk"], "keluar": r["keluar"],
+               "bersih": r["masuk"] - r["keluar"],
+               "tercapai": r["masuk"] - r["keluar"] >= target} for r in rows]
+    bersih = total_masuk - total_keluar
+    rata = bersih // len(harian) if harian else 0
+    return render_template(
+        "rekap.html", p=p, judul=judul, masuk=masuk, keluar=keluar,
+        total_masuk=total_masuk, total_keluar=total_keluar, bersih=bersih,
+        hari_kerja=len(harian), rata=rata, harian=harian)
 
 if __name__ == "__main__":
     init_db()

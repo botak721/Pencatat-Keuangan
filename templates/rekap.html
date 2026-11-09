@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block sub %}Rekap{% endblock %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-4 pt-3">
+{% macro blok(judul, items, teks, bar, tanda) %}
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col gap-3">
+<h2 class="font-title-md text-title-md">{{ judul }}</h2>
+{% for r in items %}<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] {{ teks }}">{{ r.ikon }}</span><span class="font-body-md text-body-md text-on-surface">{{ r.nama }}</span></div>
+<span class="font-currency-body text-currency-body {{ teks }}">{{ tanda }}{{ r.total|rp }} <span class="font-label-sm text-label-sm text-on-surface-variant">({{ r.persen }}%)</span></span></div>
+<div class="h-2 rounded-full bg-surface-container overflow-hidden"><div class="h-full rounded-full {{ bar }}" style="width: {{ r.persen }}%;"></div></div></div>
+{% else %}<p class="font-body-sm text-body-sm text-on-surface-variant">Belum ada data.</p>{% endfor %}</div>
+{% endmacro %}
+<div class="flex gap-2">{% for k, n in [('minggu','7 hari'),('bulan','Bulan ini')] %}<a href="/rekap?p={{ k }}" class="px-4 py-2 rounded-full font-label-md text-label-md {{ 'bg-primary text-on-primary' if p == k else 'bg-surface-container-low text-on-surface-variant' }}">{{ n }}</a>{% endfor %}</div>
+<div class="rounded-2xl bg-gradient-to-br from-primary-container via-primary to-inverse-surface text-on-primary p-5 shadow-xl shadow-primary/20">
+<span class="font-label-md text-label-md text-on-primary/80 uppercase tracking-wider">Pendapatan bersih · {{ judul }}</span>
+<div class="font-currency-display text-currency-display my-1">{{ '+' if bersih >= 0 else '-' }}{{ bersih|abs|rp }}</div>
+<div class="flex justify-between font-label-md text-label-md text-on-primary/80"><span>{{ hari_kerja }} hari ada transaksi</span><span>Rata-rata {{ '+' if rata >= 0 else '-' }}{{ rata|abs|rp }}/hari</span></div></div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm"><span class="font-label-sm text-label-sm text-on-surface-variant">Pemasukan</span><div class="font-currency-body text-currency-body text-tertiary font-bold">+{{ total_masuk|rp }}</div></div>
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm"><span class="font-label-sm text-label-sm text-on-surface-variant">Pengeluaran</span><div class="font-currency-body text-currency-body text-error font-bold">-{{ total_keluar|rp }}</div></div></div>
+{{ blok('Pemasukan per sumber', masuk, 'text-tertiary', 'bg-tertiary-fixed-dim', '+') }}
+{{ blok('Pengeluaran per kategori', keluar, 'text-error', 'bg-error', '-') }}
+<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col">
+<h2 class="font-title-md text-title-md mb-1">Per hari</h2>
+{% for h in harian %}<div class="flex items-center justify-between py-2.5 border-b border-outline-variant/40 last:border-0">
+<div><div class="font-body-md text-body-md text-on-surface">{{ h.label }}</div><div class="font-label-sm text-label-sm text-on-surface-variant">+{{ h.masuk|rp }} / -{{ h.keluar|rp }}</div></div>
+<div class="flex items-center gap-1.5"><span class="font-currency-body text-currency-body {{ 'text-tertiary' if h.bersih >= 0 else 'text-error' }} font-semibold">{{ '+' if h.bersih >= 0 else '-' }}{{ h.bersih|abs|rp }}</span>{% if h.tercapai %}<span class="material-symbols-outlined text-[18px] text-tertiary">check_circle</span>{% endif %}</div></div>
+{% else %}<p class="font-body-sm text-body-sm text-on-surface-variant">Belum ada transaksi di periode ini.</p>{% endfor %}</div>
+</div></main>{% endblock %}

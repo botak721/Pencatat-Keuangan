@@ -624,6 +624,135 @@ def laporan():
         total_masuk=total_masuk, total_keluar=total_keluar, bersih=bersih,
         hari_kerja=len(harian), rata=rata, harian=harian)
 
+STANDAR = [("Oli Mesin", 2000), ("Oli Gardan / Transmisi", 8000),
+           ("V-Belt & Roller CVT", 24000), ("Kampas Rem", 20000),
+           ("Ban", 25000), ("Busi", 12000)]
+
+
+def info_motor(db):
+    db.executescript("""
+    CREATE TABLE IF NOT EXISTS pengaturan(kunci TEXT PRIMARY KEY, nilai TEXT);
+    CREATE TABLE IF NOT EXISTS komponen(
+        id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT NOT NULL,
+        interval_km INTEGER NOT NULL, terakhir_km INTEGER NOT NULL DEFAULT 0,
+        terakhir_tanggal TEXT, biaya INTEGER NOT NULL DEFAULT 0);
+    CREATE TABLE IF NOT EXISTS servis(
+        id INTEGER PRIMARY KEY AUTOINCREMENT, komponen_id INTEGER NOT NULL,
+        tanggal TEXT NOT NULL, odometer INTEGER NOT NULL,
+        biaya INTEGER NOT NULL DEFAULT 0, catatan TEXT);
+    """)
+    d = {r["kunci"]: r["nilai"] for r in db.execute("SELECT kunci, nilai FROM pengaturan")}
+    return {"nama": d.get("motor", "Motor saya"), "plat": d.get("plat", ""),
+            "odo": int(d.get("odometer", 0))}
+
+
+def simpan_pengaturan(db, **kv):
+    for k, v in kv.items():
+        db.execute("INSERT OR REPLACE INTO pengaturan(kunci, nilai) VALUES (?,?)",
+                   (k, str(v)))
+
+
+@app.route("/motor")
+def motor():
+    db = get_db()
+    m = info_motor(db)
+    kom = []
+    for r in db.execute("SELECT * FROM komponen ORDER BY id").fetchall():
+        pakai = m["odo"] - r["terakhir_km"]
+        persen = round(pakai * 100 / r["interval_km"])
+        status, warna = (("Lewat jadwal", "error") if persen >= 100 else
+                         ("Segera ganti", "warn") if persen >= 80 else
+                         ("Aman", "ok"))
+        kom.append(dict(r, persen=max(0, min(persen, 100)),
+                        sisa=r["interval_km"] - pakai, status=status, warna=warna))
+    biaya = db.execute(
+        "SELECT COALESCE(SUM(biaya),0) FROM servis WHERE substr(tanggal,1,4)=?",
+        (str(date.today().year),)).fetchone()[0]
+    mendesak = max(kom, key=lambda k: k["persen"], default=None)
+    return render_template("motor.html", m=m, kom=kom, biaya=biaya, mendesak=mendesak)
+
+
+@app.route("/motor/info", methods=["POST"])
+def motor_info():
+    db = get_db()
+    info_motor(db)
+    f = request.form
+    simpan_pengaturan(db, motor=f.get("nama", "").strip() or "Motor saya",
+                      plat=f.get("plat", "").strip(),
+                      odometer=int(f.get("odometer") or 0))
+    db.commit()
+    return redirect("/motor")
+
+
+@app.route("/motor/standar", methods=["POST"])
+def motor_standar():
+    db = get_db()
+    m = info_motor(db)
+    for nama, interval in STANDAR:
+        db.execute("INSERT INTO komponen(nama, interval_km, terakhir_km) VALUES (?,?,?)",
+                   (nama, interval, m["odo"]))
+    db.commit()
+    return redirect("/motor")
+
+
+@app.route("/motor/komponen/baru")
+@app.route("/motor/komponen/<int:kid>/servis")
+def motor_form(kid=None):
+    db = get_db()
+    m = info_motor(db)
+    k = None
+    if kid:
+        k = db.execute("SELECT * FROM komponen WHERE id=?", (kid,)).fetchone()
+        if not k:
+            return redirect("/motor")
+    return render_template("motor_form.html", k=k, odo=m["odo"],
+                           hari=date.today().isoformat(), akun=ambil_akun(db))
+
+
+@app.route("/motor/komponen/simpan", methods=["POST"])
+def komponen_simpan():
+    db = get_db()
+    f = request.form
+    db.execute("INSERT INTO komponen(nama, interval_km, terakhir_km) VALUES (?,?,?)",
+               (f["nama"].strip(), max(1, int(f["interval_km"])),
+                int(f.get("terakhir_km") or 0)))
+    db.commit()
+    return redirect("/motor")
+
+
+@app.route("/motor/servis/simpan", methods=["POST"])
+def servis_simpan():
+    db = get_db()
+    m = info_motor(db)
+    f = request.form
+    kid, odo = int(f["komponen_id"]), int(f["odometer"])
+    biaya, akun_id = int(f.get("biaya") or 0), int(f.get("akun_id") or 0)
+    tgl = f.get("tanggal") or date.today().isoformat()
+    k = db.execute("SELECT * FROM komponen WHERE id=?", (kid,)).fetchone()
+    if not k:
+        return redirect("/motor")
+    db.execute("INSERT INTO servis(komponen_id, tanggal, odometer, biaya, catatan) "
+               "VALUES (?,?,?,?,?)", (kid, tgl, odo, biaya, f.get("catatan", "").strip()))
+    db.execute("UPDATE komponen SET terakhir_km=?, terakhir_tanggal=?, biaya=? WHERE id=?",
+               (odo, tgl, biaya, kid))
+    if odo > m["odo"]:
+        simpan_pengaturan(db, odometer=odo)
+    if biaya > 0 and akun_id > 0:
+        db.execute("""INSERT INTO transaksi(tanggal, tipe, kategori, jumlah, akun_id, catatan)
+                      VALUES (?,?,?,?,?,?)""",
+                   (tgl, "keluar", "Servis", biaya, akun_id, "Servis " + k["nama"]))
+    db.commit()
+    return redirect("/motor")
+
+
+@app.route("/motor/komponen/<int:kid>/hapus", methods=["POST"])
+def komponen_hapus(kid):
+    db = get_db()
+    db.execute("DELETE FROM servis WHERE komponen_id=?", (kid,))
+    db.execute("DELETE FROM komponen WHERE id=?", (kid,))
+    db.commit()
+    return redirect("/motor")
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)

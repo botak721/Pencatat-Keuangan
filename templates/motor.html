@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block sub %}Perawatan Motor{% endblock %}
+{% block content %}<main class="flex flex-col relative w-full pt-16 pb-28 bg-background min-h-screen"><div class="flex flex-col w-full px-gutter pb-8 gap-y-4 pt-3">
+<div class="rounded-2xl bg-gradient-to-br from-primary-container via-primary to-inverse-surface text-on-primary p-5 shadow-xl shadow-primary/20">
+<div class="flex justify-between items-start"><div><span class="font-label-md text-label-md uppercase tracking-wider">{{ m.nama }}</span><div class="font-label-sm text-label-sm text-on-primary/80">{{ m.plat or 'Plat belum diisi' }}</div></div><span class="material-symbols-outlined">two_wheeler</span></div>
+<div class="mt-3 font-label-md text-label-md text-on-primary/80">Odometer saat ini</div>
+<div class="font-currency-display text-currency-display">{{ '{:,}'.format(m.odo).replace(',', '.') }} <span class="font-label-md text-label-md">km</span></div>
+<div class="mt-2 font-label-md text-label-md text-on-primary/80">Biaya servis tahun ini: {{ biaya|rp }}</div></div>
+{% if mendesak and mendesak.persen >= 80 %}<div class="bg-secondary-container text-on-secondary-container rounded-xl p-3.5 flex items-center justify-between gap-3">
+<div><div class="font-title-md text-title-md">{{ mendesak.nama }}</div><div class="font-body-sm text-body-sm">{{ 'Sudah lewat ' ~ (mendesak.sisa|abs) ~ ' km' if mendesak.sisa < 0 else 'Sisa ' ~ mendesak.sisa ~ ' km lagi' }}</div></div>
+<a href="/motor/komponen/{{ mendesak.id }}/servis" class="shrink-0 px-3 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md">Catat Servis</a></div>{% endif %}
+<div class="flex justify-between items-center"><h2 class="font-title-md text-title-md">Kondisi Komponen</h2><span class="font-label-md text-label-md text-on-surface-variant">{{ kom|length }} part</span></div>
+{% for k in kom %}<div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col gap-2.5">
+<div class="flex justify-between items-start gap-2"><div class="min-w-0"><h3 class="font-body-md text-body-md font-semibold text-on-surface">{{ k.nama }}</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Interval {{ k.interval_km }} km · terakhir {{ k.terakhir_tanggal or 'belum dicatat' }} di {{ k.terakhir_km }} km</p></div>
+<span class="shrink-0 px-2.5 py-1 rounded-full font-label-sm text-label-sm {{ {'error':'bg-error-container text-on-error-container','warn':'bg-secondary-container text-on-secondary-container','ok':'bg-tertiary-container/15 text-tertiary'}[k.warna] }}">{{ k.status }}</span></div>
+<div><div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant mb-1"><span>Pemakaian {{ k.persen }}%</span><span>{{ 'Lewat ' ~ (k.sisa|abs) ~ ' km' if k.sisa < 0 else 'Sisa ' ~ k.sisa ~ ' km' }}</span></div>
+<div class="h-2 rounded-full bg-surface-container overflow-hidden"><div class="h-full rounded-full {{ {'error':'bg-error','warn':'bg-secondary','ok':'bg-tertiary-fixed-dim'}[k.warna] }}" style="width: {{ k.persen }}%;"></div></div></div>
+<div class="flex gap-2"><a href="/motor/komponen/{{ k.id }}/servis" class="flex-1 text-center py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md">Catat Servis</a>
+<form method="post" action="/motor/komponen/{{ k.id }}/hapus" onsubmit="return confirm('Hapus komponen {{ k.nama }}?')"><button class="px-3 py-2.5 rounded-xl bg-error-container/40 text-error"><span class="material-symbols-outlined text-[18px]">delete</span></button></form></div></div>
+{% else %}<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-3"><p class="font-body-md text-body-md text-on-surface-variant">Belum ada komponen yang dipantau.</p>
+<form method="post" action="/motor/standar"><button class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary font-title-md text-title-md">Isi komponen standar</button></form>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Interval standar hanya perkiraan umum. Sesuaikan dengan buku servis motor lo.</p></div>{% endfor %}
+<a href="/motor/komponen/baru" class="text-center py-3 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md">+ Tambah komponen</a>
+<form method="post" action="/motor/info" class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col gap-2" autocomplete="off">
+<h2 class="font-title-md text-title-md">Data motor</h2>
+<input name="nama" value="{{ m.nama }}" placeholder="Nama motor, mis. Honda Vario 160" class="w-full bg-surface-container-low rounded-xl px-3.5 py-3 outline-none focus:ring-2 focus:ring-primary/40 font-body-lg text-body-lg">
+<input name="plat" value="{{ m.plat }}" placeholder="Plat nomor" class="w-full bg-surface-container-low rounded-xl px-3.5 py-3 outline-none focus:ring-2 focus:ring-primary/40 font-body-lg text-body-lg">
+<input name="odometer" type="number" inputmode="numeric" min="0" value="{{ m.odo }}" placeholder="Odometer (km)" class="w-full bg-surface-container-low rounded-xl px-3.5 py-3 outline-none focus:ring-2 focus:ring-primary/40 font-body-lg text-body-lg">
+<button class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary font-title-md text-title-md">Simpan</button></form>
+</div></main>{% endblock %}
